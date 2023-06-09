@@ -8,26 +8,27 @@ if (!breedName) {
   process.exit(1);
 }
 
+const fetchBreedDescription = function(breedName, callback) {
+  const url = `https://api.thecatapi.com/v1/breeds/search?q=${breedName}`;
 
-const url = `https://api.thecatapi.com/v1/breeds/search?q=${breedName}`;
+  request(url, (error, response, body) => {
+    if (error) {
+      callback(`Request error: ${error.message}`);
+      return;
+    }
 
+    const data = JSON.parse(body);
 
-request(url, (error, response, body) => {
-  if (error) {
-    console.error('Request error:', error.message);
-    return;
-  }
+    if (data.length === 0) {
+      callback(`Breed '${breedName}' not found.`);
+    } else {
+      const breedInfo = {
+        name: data[0].name,
+        description: data[0].description
+      };
+      callback(null, breedInfo.description);
+    }
+  });
+};
 
-  const data = JSON.parse(body);
-
-  console.log('Data:', data);
-  console.log('Type of data:', typeof data);
-
-  if (data.length === 0) {
-    console.log(`Breed '${breedName}' not found.`);
-  } else {
-    console.log('Breed Information:');
-    console.log('Name:', data[0].name);
-    console.log('Description:', data[0].description);
-  }
-});
+module.exports = { fetchBreedDescription }
